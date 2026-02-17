@@ -462,7 +462,14 @@ def index():
 def diagnose():
     """Diagnose electrical fault from sensor readings."""
     try:
+        # Safely get JSON data
+        if not request.is_json:
+            return jsonify({'status': 'error', 'message': 'Request must be JSON'}), 400
+        
         data = request.json
+        if not data:
+            return jsonify({'status': 'error', 'message': 'No data provided'}), 400
+        
         device_id = data.get('device_id', 'Unknown')
         
         # Extract sensor readings
@@ -495,84 +502,77 @@ def diagnose():
         conn.commit()
         conn.close()
         
-        # Prepare diagnosis data
-        diagnosis_data = {
-            'device_id': device_id,
-            'fault_type': fault_type,
-            'confidence': round(confidence * 100, 2),
-            'recommendation': recommendation,
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'readings': {
-                'voltage': voltage,
-                'current': current,
-                'temperature': temperature,
-                'vibration': vibration,
-                'power_factor': power_factor
-            }
-        }
-        
-        # Generate HTML report for email
-        report_html = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #667eea;">Electrical Fault Diagnosis Report</h2>
-                
-                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <p><strong>Device ID:</strong> {device_id}</p>
-                    <p><strong>Diagnosis Time:</strong> {diagnosis_data['timestamp']}</p>
-                </div>
-                
-                <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                    <h3 style="margin-top: 0; color: #856404;">Fault Detected</h3>
-                    <p style="font-size: 1.2em; color: #c33;"><strong>{fault_type}</strong></p>
-                    <p><strong>Confidence Level:</strong> {diagnosis_data['confidence']}%</p>
-                </div>
-                
-                <h3>Sensor Readings</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Voltage</strong></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{voltage} V</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Current</strong></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{current} A</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Temperature</strong></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{temperature} °C</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Vibration</strong></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{vibration} mm/s</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>Power Factor</strong></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{power_factor}</td>
-                    </tr>
-                </table>
-                
-                <h3 style="margin-top: 30px;">Mitigation & Recommendations</h3>
-                <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; border-left: 4px solid #17a2b8;">
-                    <p>{recommendation}</p>
-                </div>
-                
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 0.9em; color: #666;">
-                    <p>For more details and to view all your diagnosis reports, please log in to your account at:</p>
-                    <p>{url_for('index', _external=True)}</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        
         # Send diagnosis report email (don't let email failures block the response)
         try:
+            # Generate HTML report for email
+            report_html = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #667eea;">Electrical Fault Diagnosis Report</h2>
+                    
+                    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <p><strong>Device ID:</strong> {device_id}</p>
+                        <p><strong>Diagnosis Time:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    </div>
+                    
+                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                        <h3 style="margin-top: 0; color: #856404;">Fault Detected</h3>
+                        <p style="font-size: 1.2em; color: #c33;"><strong>{fault_type}</strong></p>
+                        <p><strong>Confidence Level:</strong> {round(confidence * 100, 2)}%</p>
+                    </div>
+                    
+                    <h3>Sensor Readings</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Voltage</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{voltage} V</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Current</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{current} A</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Temperature</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{temperature} °C</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Vibration</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{vibration} mm/s</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Power Factor</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{power_factor}</td>
+                        </tr>
+                    </table>
+                    
+                    <h3 style="margin-top: 30px;">Mitigation & Recommendations</h3>
+                    <div style="background-color: #e8f4f8; padding: 15px; border-radius: 5px; border-left: 4px solid #17a2b8;">
+                        <p>{recommendation}</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            diagnosis_data = {
+                'device_id': device_id,
+                'fault_type': fault_type,
+                'confidence': round(confidence * 100, 2),
+                'recommendation': recommendation,
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'readings': {
+                    'voltage': voltage,
+                    'current': current,
+                    'temperature': temperature,
+                    'vibration': vibration,
+                    'power_factor': power_factor
+                }
+            }
             send_diagnosis_report_email(current_user.email, current_user.username, diagnosis_data, report_html)
         except Exception as email_error:
             print(f"[EMAIL ERROR] Failed to send diagnosis report: {str(email_error)}")
         
+        # Return response
         return jsonify({
             'status': 'success',
             'device_id': device_id,
@@ -588,7 +588,8 @@ def diagnose():
             }
         })
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 400
+        print(f"[DIAGNOSIS ERROR] {str(e)}")
+        return jsonify({'status': 'error', 'message': f'Diagnosis error: {str(e)}'}), 400
 
 @app.route('/api/history', methods=['GET'])
 @login_required
