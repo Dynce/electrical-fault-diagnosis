@@ -363,6 +363,100 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Handle forgot password request."""
+    if request.method == 'POST':
+        try:
+            data = request.get_json() if request.is_json else request.form
+            email = data.get('email', '').strip()
+            
+            if not email:
+                return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+            
+            conn = get_db()
+            c = conn.cursor()
+            c.execute('SELECT id, username FROM users WHERE email = ?', (email,))
+            user_row = c.fetchone()
+            conn.close()
+            
+            if not user_row:
+                # Don't reveal if email exists or not (security best practice)
+                return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset link has been sent'}), 200
+            
+            # Generate password reset token
+            reset_token = serializer.dumps(user_row['id'], salt='password-reset-salt')
+            reset_url = url_for('reset_password', token=reset_token, _external=True)
+            
+            # Send reset email
+            try:
+                msg = Message(
+                    subject='Reset Your Password - Electrical Fault Diagnosis System',
+                    recipients=[email],
+                    html=f'''
+                    <html>
+                        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+                            <div style="max-width: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <h2 style="color: #333; text-align: center;">⚡ Password Reset Request</h2>
+                                <p style="color: #666; line-height: 1.6;">Hello <strong>{user_row['username']}</strong>,</p>
+                                <p style="color: #666; line-height: 1.6;">You requested to reset your password. Click the button below to create a new password:</p>
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="{reset_url}" style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+                                </div>
+                                <p style="color: #999; font-size: 12px;">Or copy and paste this link in your browser:</p>
+                                <p style="color: #999; font-size: 12px; word-break: break-all;">{reset_url}</p>
+                                <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                                <p style="color: #999; font-size: 12px;">This link will expire in 24 hours. If you did not request a password reset, please ignore this email.</p>
+                                <p style="color: #999; font-size: 12px;">Best regards,<br>Electrical Fault Diagnosis System</p>
+                            </div>
+                        </body>
+                    </html>
+                    '''
+                )
+                mail.send(msg)
+                print(f"[EMAIL] Password reset link sent to {email}")
+            except Exception as e:
+                print(f"[EMAIL ERROR] Failed to send password reset to {email}: {str(e)}")
+            
+            return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset link has been sent'}), 200
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 400
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Handle password reset."""
+    try:
+        user_id = serializer.loads(token, salt='password-reset-salt', max_age=3600*24)  # 24 hour expiry
+    except Exception as e:
+        return render_template('activation_failed.html', error='Invalid or expired reset link')
+    
+    if request.method == 'POST':
+        try:
+            data = request.get_json() if request.is_json else request.form
+            password = data.get('password', '')
+            
+            if not password:
+                return jsonify({'status': 'error', 'message': 'Password is required'}), 400
+            
+            if len(password) < 6:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 6 characters'}), 400
+            
+            # Update password
+            password_hash = generate_password_hash(password)
+            conn = get_db()
+            c = conn.cursor()
+            c.execute('UPDATE users SET password_hash = ? WHERE id = ?', (password_hash, user_id))
+            conn.commit()
+            conn.close()
+            
+            return jsonify({'status': 'success', 'message': 'Password reset successfully'}), 200
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 400
+    
+    return render_template('reset_password.html')
+
 @app.route('/')
 def index():
     """Render home page."""
