@@ -420,14 +420,11 @@ def forgot_password():
             except Exception as e:
                 print(f"[EMAIL ERROR] Failed to send password reset to {email}: {str(e)}")
             
-            # Return response with reset_url for fallback display
-            response_data = {
+            # Return success response (no reset_url for security - email-only delivery)
+            return jsonify({
                 'status': 'success',
-                'message': 'Password reset link has been sent to your email.' if email_sent else 'Click the link below to reset your password.',
-                'reset_url': reset_url,
-                'email_sent': email_sent
-            }
-            return jsonify(response_data), 200
+                'message': 'If an account exists with this email, check your inbox for a password reset link.'
+            }), 200
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}), 400
     
