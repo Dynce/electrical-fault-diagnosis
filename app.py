@@ -567,8 +567,11 @@ def diagnose():
         </html>
         """
         
-        # Send diagnosis report email
-        send_diagnosis_report_email(current_user.email, current_user.username, diagnosis_data, report_html)
+        # Send diagnosis report email (don't let email failures block the response)
+        try:
+            send_diagnosis_report_email(current_user.email, current_user.username, diagnosis_data, report_html)
+        except Exception as email_error:
+            print(f"[EMAIL ERROR] Failed to send diagnosis report: {str(email_error)}")
         
         return jsonify({
             'status': 'success',
