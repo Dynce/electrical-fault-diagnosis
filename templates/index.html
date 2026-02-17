@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Denis Mulatya Mutua">
+    <meta name="description" content="Electrical Fault Diagnosis System - An intelligent web-based application for real-time electrical fault detection. Developed by Denis Mulatya Mutua, Electrical & Electronics Engineering Student at Moi University.">
+    <meta name="keywords" content="electrical fault diagnosis, fault detection, electrical engineering, monitoring system">
+    <meta name="creator" content="Denis Mulatya Mutua">
+    <meta property="og:title" content="Electrical Fault Diagnosis System">
+    <meta property="og:description" content="Professional system for real-time electrical fault detection and analysis.">
+    <title>Electrical Fault Diagnosis System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>⚡ Electrical Fault Diagnosis System</h1>
+                    <p>Real-time electrical installation monitoring and fault detection</p>
+                </div>
+                <div class="header-right">
+                    <span id="username-display">Welcome, User</span>
+                    <a href="/logout" class="btn btn-logout">Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-btn active" data-tab="diagnose">Diagnose</button>
+            <button class="nav-btn" data-tab="history">History</button>
+            <button class="nav-btn" data-tab="stats">Statistics</button>
+        </nav>
+
+        <!-- Diagnosis Tab -->
+        <section id="diagnose" class="tab-content active">
+            <div class="form-section">
+                <h2>Sensor Data Input</h2>
+                <form id="diagnosisForm">
+                    <div class="form-group">
+                        <label for="device_id">Device ID:</label>
+                        <input type="text" id="device_id" name="device_id" value="Device-001" required>
+                    </div>
+
+                    <div class="sensor-grid">
+                        <div class="form-group">
+                            <label for="voltage">Voltage (V):</label>
+                            <input type="number" id="voltage" name="voltage" value="230" step="0.1" required>
+                            <span class="unit">Volts</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="current">Current (A):</label>
+                            <input type="number" id="current" name="current" value="50" step="0.1" required>
+                            <span class="unit">Amperes</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C):</label>
+                            <input type="number" id="temperature" name="temperature" value="60" step="0.1" required>
+                            <span class="unit">Celsius</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vibration">Vibration (mm/s):</label>
+                            <input type="number" id="vibration" name="vibration" value="5" step="0.1" required>
+                            <span class="unit">mm/s</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="power_factor">Power Factor:</label>
+                            <input type="number" id="power_factor" name="power_factor" value="0.9" min="0" max="1" step="0.01" required>
+                            <span class="unit">0-1</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Run Diagnosis</button>
+                </form>
+            </div>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="result-section" style="display:none;">
+                <div id="resultCard" class="result-card">
+                    <div class="result-header">
+                        <h2>Diagnosis Result</h2>
+                        <span id="statusIcon" class="status-icon"></span>
+                    </div>
+
+                    <div class="result-body">
+                        <div class="result-item">
+                            <label>Device ID:</label>
+                            <span id="result_device_id"></span>
+                        </div>
+
+                        <div class="result-item highlight">
+                            <label>Fault Type:</label>
+                            <span id="result_fault_type" class="fault-type"></span>
+                        </div>
+
+                        <div class="result-item">
+                            <label>Confidence Level:</label>
+                            <div class="confidence-bar">
+                                <div id="confidenceBarFill" class="confidence-fill"></div>
+                            </div>
+                            <span id="result_confidence"></span>
+                        </div>
+
+                        <div class="result-item">
+                            <label>Recommendation:</label>
+                            <p id="result_recommendation" class="recommendation"></p>
+                        </div>
+
+                        <div class="readings-box">
+                            <h3>Sensor Readings</h3>
+                            <div class="reading-grid">
+                                <div class="reading">
+                                    <span class="reading-label">Voltage</span>
+                                    <span id="reading_voltage" class="reading-value"></span>V
+                                </div>
+                                <div class="reading">
+                                    <span class="reading-label">Current</span>
+                                    <span id="reading_current" class="reading-value"></span>A
+                                </div>
+                                <div class="reading">
+                                    <span class="reading-label">Temperature</span>
+                                    <span id="reading_temperature" class="reading-value"></span>°C
+                                </div>
+                                <div class="reading">
+                                    <span class="reading-label">Vibration</span>
+                                    <span id="reading_vibration" class="reading-value"></span>mm/s
+                                </div>
+                                <div class="reading">
+                                    <span class="reading-label">Power Factor</span>
+                                    <span id="reading_power_factor" class="reading-value"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <span id="result_timestamp" class="timestamp"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner" style="display:none;">
+                <div class="spinner"></div>
+                <p>Analyzing sensor data...</p>
+            </div>
+        </section>
+
+        <!-- History Tab -->
+        <section id="history" class="tab-content">
+            <h2>Diagnosis History</h2>
+            <div id="historyTable" class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Device ID</th>
+                            <th>Fault Type</th>
+                            <th>Confidence</th>
+                            <th>Sensor Readings</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="5" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Statistics Tab -->
+        <section id="stats" class="tab-content">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Diagnoses</h3>
+                    <p class="stat-value" id="stat_total">-</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Confidence</h3>
+                    <p class="stat-value" id="stat_avg_conf">-</p>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>Fault Breakdown</h3>
+                <div id="faultBreakdown" class="breakdown-list">
+                    <p class="loading">Loading...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Error</h2>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>⚡ Electrical Fault Diagnosis System</h4>
+                <p>© 2026 All Rights Reserved</p>
+            </div>
+            <div class="footer-section">
+                <h4>Developed By</h4>
+                <p>Denis Mulatya Mutua<br>
+                BSc Electrical & Electronics Engineering<br>
+                Moi University, Eldoret, Kenya</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>Email: <a href="mailto:denismutua970@gmail.com">denismutua970@gmail.com</a><br>
+                Phone: <a href="tel:+254700516898">0700516898</a><br>
+                <span style="font-size: 0.9em;">BSc Electrical & Electronics Engineering - 2025 Graduate</span></p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Developer</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>v1.0 | Developed 2026 | <a href="/about">About Developer</a></p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

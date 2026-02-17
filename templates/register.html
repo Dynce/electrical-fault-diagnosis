@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Denis Mulatya Mutua">
+    <meta name="description" content="Register for Electrical Fault Diagnosis System - Developed by Denis Mulatya Mutua">
+    <title>Register - Electrical Fault Diagnosis</title>
+    <link rel="stylesheet" href="/static/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>⚡ Electrical Fault Diagnosis</h1>
+                <p>Create a new account</p>
+            </div>
+
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required placeholder="Choose a username">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required placeholder="At least 6 characters">
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Confirm Password:</label>
+                    <input type="password" id="password_confirm" name="password_confirm" required placeholder="Confirm your password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login">Login here</a></p>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display:none;"></div>
+            <div id="successMessage" class="success-message" style="display:none;"></div>
+            <div id="activationLink" class="activation-link" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const password_confirm = document.getElementById('password_confirm').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const activationDiv = document.getElementById('activationLink');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            activationDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password, password_confirm })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    successDiv.innerHTML = `<strong>Account Created Successfully!</strong><br>${data.message}`;
+                    successDiv.style.display = 'block';
+                    
+                    // Show activation link if email failed
+                    if (data.email_failed || data.activation_url) {
+                        activationDiv.innerHTML = `
+                            <h4 style="margin-top: 0;">Click link to activate:</h4>
+                            <a href="${data.activation_url}" target="_blank" style="word-break: break-all; text-decoration: underline;">
+                                ${data.activation_url}
+                            </a>
+                            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">Or copy and paste this link in your browser address bar.</p>
+                        `;
+                        activationDiv.style.display = 'block';
+                    }
+                    
+                    document.getElementById('registerForm').reset();
+                    
+                    // Only redirect if email was sent successfully
+                    if (!data.email_failed) {
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 3000);
+                    }
+                } else {
+                    errorDiv.textContent = data.message || 'Registration failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

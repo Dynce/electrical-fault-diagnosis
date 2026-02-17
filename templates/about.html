@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Denis Mulatya Mutua">
+    <meta name="description" content="Electrical Fault Diagnosis System developed by Denis Mulatya Mutua, Electrical & Electronics Engineering Student at Moi University.">
+    <title>About - Electrical Fault Diagnosis System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .about-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .about-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .about-header h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .about-header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .about-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .about-section p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .contact-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .contact-info p {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-info strong {
+            color: #667eea;
+            min-width: 100px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #667eea, transparent);
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="about-container">
+            <a href="/" class="back-btn">← Back to Home</a>
+
+            <div class="about-header">
+                <h1>⚡ About Electrical Fault Diagnosis System</h1>
+                <p>A Professional System for Real-Time Electrical Fault Detection & Analysis</p>
+            </div>
+
+            <div class="about-section">
+                <h2>About the System</h2>
+                <p>
+                    The <strong>Electrical Fault Diagnosis System</strong> is an intelligent, web-based application designed to assist technicians, engineers, and maintenance professionals in diagnosing electrical faults efficiently and accurately.
+                </p>
+                <p>
+                    Using advanced machine learning algorithms and real-time sensor data analysis, the system can identify various electrical faults including overheat conditions, overload situations, and short circuits. This enables quick decision-making and preventive maintenance.
+                </p>
+                <p>
+                    <strong>Version:</strong> 1.0 | <strong>Year:</strong> 2026
+                </p>
+            </div>
+
+            <div class="about-section">
+                <h2>Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🔬 Intelligent Analysis</h3>
+                        <p>Machine learning-based fault detection using sensor readings and advanced algorithms.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Real-Time Monitoring</h3>
+                        <p>Processes electrical parameters including voltage, current, temperature, and vibration.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📧 Report Generation</h3>
+                        <p>Automated diagnosis reports with recommendations sent directly to email.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📈 Data History</h3>
+                        <p>Complete diagnosis history and statistical analysis of all diagnoses.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔐 Secure Authentication</h3>
+                        <p>User registration, email verification, and session management.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💡 Smart Recommendations</h3>
+                        <p>Actionable mitigation strategies for detected electrical faults.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="about-section">
+                <h2>About the Developer</h2>
+                <p>
+                    This Electrical Fault Diagnosis System was developed by <strong>Denis Mulatya Mutua</strong>, a Bachelor of Science degree holder in Electrical and Electronics Engineering from Moi University. He graduated on <strong>December 18, 2025</strong>.
+                </p>
+                <p>
+                    This project represents a comprehensive application of engineering principles, software development, and practical problem-solving to create a real-world solution for the electrical industry.
+                </p>
+
+                <div class="contact-info">
+                    <p>
+                        <strong>Name:</strong> Denis Mulatya Mutua
+                    </p>
+                    <p>
+                        <strong>Degree:</strong> BSc Electrical & Electronics Engineering (2025)
+                    </p>
+                    <p>
+                        <strong>Institution:</strong> Moi University, Eldoret, Kenya
+                    </p>
+                    <p>
+                        <strong>Email:</strong> <a href="mailto:denismutua970@gmail.com">denismutua970@gmail.com</a>
+                    </p>
+                    <p>
+                        <strong>Phone:</strong> <a href="tel:+254700516898">0700516898</a>
+                    </p>
+                    <p>
+                        <strong>Graduation Date:</strong> December 18, 2025
+                    </p>
+                    <p>
+                        <strong>Project Developed:</strong> 2026
+                    </p>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h2>Technology Stack</h2>
+                <p>
+                    The system is built using modern web technologies and machine learning frameworks:
+                </p>
+                <ul style="line-height: 2; color: #666;">
+                    <li><strong>Backend:</strong> Python, Flask, Flask-Login, Flask-Mail</li>
+                    <li><strong>Machine Learning:</strong> Scikit-learn, RandomForest Classifier, StandardScaler</li>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+                    <li><strong>Database:</strong> SQLite3 with role-based access control</li>
+                    <li><strong>Security:</strong> Password hashing, Email verification, Token-based authentication</li>
+                    <li><strong>Deployment:</strong> Waitress WSGI server</li>
+                </ul>
+            </div>
+
+            <div class="about-section">
+                <h2>Professional Credentials</h2>
+                <p>
+                    <strong>© 2026 Electrical Fault Diagnosis System. All Rights Reserved.</strong>
+                </p>
+                <p>
+                    This application is a proprietary system developed for educational and professional purposes. Unauthorized reproduction or distribution is strictly prohibited.
+                </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee;">
+                <p style="color: #999; font-size: 0.9em;">
+                    © 2026 Electrical Fault Diagnosis System<br>
+                    Developed by Denis Mulatya Mutua<br>
+                    BSc Electrical & Electronics Engineering (Graduated December 18, 2025)<br>
+                    Moi University, Eldoret, Kenya
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

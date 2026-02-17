@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Result - Electrical Fault Diagnosis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>⚡ Electrical Fault Diagnosis System</h1>
+                <p>Diagnosis Result</p>
+            </div>
+        </header>
+
+        <div id="resultContainer" style="margin-top: 30px;">
+            <a href="/" style="color: #667eea; text-decoration: none; margin-bottom: 20px; display: inline-block;">
+                ← Back to Home
+            </a>
+            <div id="resultCard" class="result-card">
+                <p class="loading">Loading result...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // This page would display the result passed from the main page
+        // Currently it's a placeholder that redirects back if no result data
+        window.addEventListener('load', () => {
+            // Check if there's result data from sessionStorage or redirect
+            const resultData = sessionStorage.getItem('diagnosisResult');
+            if (!resultData) {
+                // No result data, redirect to home
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
