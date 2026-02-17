@@ -44,6 +44,17 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Return JSON for API/ajax unauthorized requests to avoid sending HTML login page
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    try:
+        # If the request expects JSON or is targeting an API path, return JSON error
+        if request.is_json or (request.path and request.path.startswith('/api/')):
+            return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+    except Exception:
+        pass
+    return redirect(url_for('login'))
+
 # Serializer for generating activation tokens
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
