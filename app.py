@@ -311,14 +311,25 @@ def login():
             
             if not user_row:
                 return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
-            
+
             if not check_password_hash(user_row['password_hash'], password):
                 return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
-            
+
+            # Auto-activate legacy accounts that were created before activation flow changes.
+            # If the password matches but the account is not activated, flip the flag so the user can log in.
             if not user_row['is_activated']:
-                return jsonify({'status': 'error', 'message': 'Please activate your account using the link sent to your email'}), 403
-            
+                try:
+                    conn2 = get_db()
+                    c2 = conn2.cursor()
+                    c2.execute('UPDATE users SET is_activated = 1 WHERE id = ?', (user_row['id'],))
+                    conn2.commit()
+                    conn2.close()
+                    app.logger.info(f"Auto-activated user id {user_row['id']} upon successful login.")
+                except Exception as ae:
+                    app.logger.warning(f"Failed to auto-activate user {user_row['id']}: {ae}")
+
             user = User(user_row['id'], user_row['email'], user_row['username'])
+            login_user(user, remember=True)
             login_user(user, remember=True)
             
             return jsonify({'status': 'success', 'message': 'Login successful', 'redirect': '/'}), 200
@@ -666,6 +677,18 @@ def get_user():
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'status': 'error', 'message': 'Not found'}), 404
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(error):
+    """Catch-all exception handler that returns JSON instead of HTML.
+    This prevents the frontend from attempting to parse HTML as JSON.
+    """
+    try:
+        app.logger.error(f"Unhandled exception: {error}")
+    except Exception:
+        pass
+    return jsonify({'status': 'error', 'message': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
