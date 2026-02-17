@@ -78,29 +78,16 @@
                 const data = await response.json();
                 
                 if (data.status === 'success') {
-                    successDiv.innerHTML = `<strong>Account Created Successfully!</strong><br>${data.message}`;
+                    successDiv.innerHTML = `<p><strong>✅ ${data.message}</strong></p>`;
                     successDiv.style.display = 'block';
-                    
-                    // Show activation link if email failed
-                    if (data.email_failed || data.activation_url) {
-                        activationDiv.innerHTML = `
-                            <h4 style="margin-top: 0;">Click link to activate:</h4>
-                            <a href="${data.activation_url}" target="_blank" style="word-break: break-all; text-decoration: underline;">
-                                ${data.activation_url}
-                            </a>
-                            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">Or copy and paste this link in your browser address bar.</p>
-                        `;
-                        activationDiv.style.display = 'block';
-                    }
                     
                     document.getElementById('registerForm').reset();
                     
-                    // Only redirect if email was sent successfully
-                    if (!data.email_failed) {
-                        setTimeout(() => {
-                            window.location.href = '/login';
-                        }, 3000);
-                    }
+                    // Redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+
                 } else {
                     errorDiv.textContent = data.message || 'Registration failed';
                     errorDiv.style.display = 'block';

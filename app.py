@@ -265,10 +265,10 @@ def register():
                 conn.close()
                 return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
             
-            # Create user (not activated yet)
+            # Create user (auto-activated since email is now configured)
             password_hash = generate_password_hash(password)
             c.execute('INSERT INTO users (email, username, password_hash, is_activated) VALUES (?, ?, ?, ?)',
-                     (email, username, password_hash, 0))
+                     (email, username, password_hash, 1))  # Set to 1 (activated) immediately
             conn.commit()
             
             # Get the user ID
@@ -276,24 +276,11 @@ def register():
             user_id = c.fetchone()['id']
             conn.close()
             
-            # Generate activation token
-            activation_token = serializer.dumps(user_id, salt='email-confirm-salt')
-            activation_url = url_for('activate_account', token=activation_token, _external=True)
-            
-            # Send activation email
-            email_sent = send_activation_email(email, username, activation_url)
-            
-            # Return response
+            # Return success response
             response_data = {
                 'status': 'success', 
-                'activation_url': activation_url
+                'message': 'Account created successfully! You can now log in with your credentials.'
             }
-            
-            if email_sent:
-                response_data['message'] = 'Account created! Please check your email to activate your account.'
-            else:
-                response_data['message'] = 'Account created! Click the link below to activate your account.'
-                response_data['email_failed'] = True
             
             return jsonify(response_data), 201
         except Exception as e:
