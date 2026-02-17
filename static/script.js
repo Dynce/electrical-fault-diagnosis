@@ -1,16 +1,28 @@
-// Load current user info
-async function loadUserInfo() {
-    try {
-        const response = await fetch('/api/user');
+ // Load current user info
+ async function loadUserInfo() {
+     try {
+         const response = await fetch('/api/user');
+         const contentType = response.headers.get('content-type') || '';
+         if (!response.ok) {
+             const text = await response.text();
+             console.error('loadUserInfo error response:', text);
+             return;
+         }
+
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('loadUserInfo unexpected content-type:', contentType, text);
+            return;
+        }
+
         const data = await response.json();
-        
         if (data.status === 'success') {
             document.getElementById('username-display').textContent = `Welcome, ${data.user.username}`;
         }
     } catch (error) {
         console.error('Error loading user info:', error);
     }
-}
+ }
 
 // Load user info on page load
 document.addEventListener('DOMContentLoaded', loadUserInfo);
@@ -68,13 +80,36 @@ document.getElementById('diagnosisForm').addEventListener('submit', async (e) =>
             },
             body: JSON.stringify(formData)
         });
-        
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok) {
+            const text = await response.text();
+            // If API returned HTML (login page), present a clearer error
+            if (contentType.includes('text/html')) {
+                showError('Server responded with HTML (possible authentication required). Please log in again.');
+            } else {
+                try {
+                    const err = contentType.includes('application/json') ? JSON.parse(text) : null;
+                    showError(err && err.message ? err.message : 'Server error: ' + text);
+                } catch (e) {
+                    showError('Server error: ' + text);
+                }
+            }
+            return;
+        }
+
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            showError('Unexpected server response (not JSON).');
+            console.error('Non-JSON response from /api/diagnose:', text);
+            return;
+        }
+
         const data = await response.json();
-        
         if (data.status === 'success') {
             displayResult(data);
         } else {
-            showError(data.message);
+            showError(data.message || 'Diagnosis failed');
         }
     } catch (error) {
         showError('Error communicating with server: ' + error.message);
@@ -140,8 +175,23 @@ function displayResult(data) {
 async function loadHistory() {
     try {
         const response = await fetch('/api/history');
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('loadHistory error response:', text);
+            document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" class="loading">Error loading history</td></tr>';
+            return;
+        }
+
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('loadHistory unexpected content-type:', contentType, text);
+            document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" class="loading">Error loading history</td></tr>';
+            return;
+        }
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             const tbody = document.getElementById('historyBody');
             tbody.innerHTML = '';
@@ -175,8 +225,23 @@ async function loadHistory() {
 async function loadStats() {
     try {
         const response = await fetch('/api/stats');
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('loadStats error response:', text);
+            document.getElementById('faultBreakdown').innerHTML = '<p class="loading">Error loading statistics</p>';
+            return;
+        }
+
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('loadStats unexpected content-type:', contentType, text);
+            document.getElementById('faultBreakdown').innerHTML = '<p class="loading">Error loading statistics</p>';
+            return;
+        }
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             document.getElementById('stat_total').textContent = data.total_diagnoses;
             document.getElementById('stat_avg_conf').textContent = data.avg_confidence.toFixed(1) + '%';
