@@ -244,8 +244,8 @@ def register():
             data = request.get_json() if request.is_json else request.form
             email = data.get('email', '').strip()
             username = data.get('username', '').strip()
-            password = data.get('password', '')
-            password_confirm = data.get('password_confirm', '')
+            password = data.get('password', '').strip()
+            password_confirm = data.get('password_confirm', '').strip()
             
             # Validation
             if not email or not username or not password:
@@ -298,7 +298,7 @@ def login():
         try:
             data = request.get_json() if request.is_json else request.form
             email = data.get('email', '').strip()
-            password = data.get('password', '')
+            password = data.get('password', '').strip()
             
             if not email or not password:
                 return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
