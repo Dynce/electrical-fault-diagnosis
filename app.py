@@ -388,7 +388,8 @@ def forgot_password():
             reset_token = serializer.dumps(user_row['id'], salt='password-reset-salt')
             reset_url = url_for('reset_password', token=reset_token, _external=True)
             
-            # Send reset email
+            # Try to send reset email
+            email_sent = False
             try:
                 msg = Message(
                     subject='Reset Your Password - Electrical Fault Diagnosis System',
@@ -414,11 +415,19 @@ def forgot_password():
                     '''
                 )
                 mail.send(msg)
+                email_sent = True
                 print(f"[EMAIL] Password reset link sent to {email}")
             except Exception as e:
                 print(f"[EMAIL ERROR] Failed to send password reset to {email}: {str(e)}")
             
-            return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset link has been sent'}), 200
+            # Return response with reset_url for fallback display
+            response_data = {
+                'status': 'success',
+                'message': 'Password reset link has been sent to your email.' if email_sent else 'Click the link below to reset your password.',
+                'reset_url': reset_url,
+                'email_sent': email_sent
+            }
+            return jsonify(response_data), 200
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}), 400
     
